@@ -1,4 +1,6 @@
 import streamlit as st
+import os
+import sys
 # This prevents Streamlit from watching the torch module
 os.environ["STREAMLIT_WATCH_MODULES"] = "false"
 import numpy as np
@@ -9,7 +11,6 @@ import torch.nn.functional as F
 from PIL import Image
 import torchvision.transforms as transforms
 from torchvision import models
-import os
 import joblib
 import json
 import io  # Added for saving images
