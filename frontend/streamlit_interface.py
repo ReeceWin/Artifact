@@ -80,40 +80,89 @@ class CombinedModel(nn.Module):
 # Use st.cache_resource for model loading to avoid performance issues
 @st.cache_resource
 def load_model_and_metadata():
-    """Load model and metadata when needed, not at initialization"""
+    """Load model and metadata with extensive path checking and diagnostics"""
     try:
-        # Try to load metadata file        
-        # Check current directory
-        st.write("Current directory:", os.getcwd())
-        st.write("Files in directory:", os.listdir())
-        try:
-            metadata = joblib.load('model_metadata.joblib')
-        except Exception as e:
-            st.error(f"Failed to load model_metadata.joblib: {str(e)}")
-            raise
+        import os
         
-        # Try to create model with correct dimensions
-        try:
-            model = CombinedModel(
-                num_classes=len(metadata['class_names']),
-                tabular_dim=metadata['tabular_dim']
-            )
-        except Exception as e:
-            st.error(f"Failed to create model: {str(e)}")
-            raise
-        
-        # Try to load trained weights
-        try:
-            model.load_state_dict(torch.load('final_skin_model.pth', map_location=torch.device('cpu')))
-        except Exception as e:
-            st.error(f"Failed to load final_skin_model.pth: {str(e)}")
-            raise
+        # Show detailed environment info
+        with st.expander("Debugging Environment", expanded=True):
+            st.write("Current working directory:", os.getcwd())
+            st.write("Files in current directory:", os.listdir())
             
-        model.eval()  # Set to evaluation mode
+            # List contents of parent directories
+            parent_dir = os.path.dirname(os.getcwd())
+            if os.path.exists(parent_dir):
+                st.write(f"Files in parent directory ({parent_dir}):", os.listdir(parent_dir))
+            
+            # Check frontend directory if it exists
+            frontend_dir = os.path.join(os.getcwd(), "frontend")
+            if os.path.exists(frontend_dir):
+                st.write(f"Files in frontend directory:", os.listdir(frontend_dir))
         
-        return model, metadata, True
+        # Possible locations to check for model files
+        possible_paths = [
+            # Current directory
+            ("./", "model_metadata.joblib", "final_skin_model.pth"),
+            # Frontend directory
+            ("./frontend/", "model_metadata.joblib", "final_skin_model.pth"),
+            # Absolute paths
+            ("/mount/src/artifact/", "model_metadata.joblib", "final_skin_model.pth"),
+            ("/mount/src/artifact/frontend/", "model_metadata.joblib", "final_skin_model.pth"),
+            # Try different filenames (lowercase, etc)
+            ("./", "model_metadata.joblib", "final_skin_model.pt"),
+            ("./frontend/", "model_metadata.joblib", "final_skin_model.pt")
+        ]
+        
+        # Try each possible path combination
+        for base_path, metadata_file, model_file in possible_paths:
+            metadata_path = os.path.join(base_path, metadata_file)
+            model_path = os.path.join(base_path, model_file)
+            
+            st.write(f"Trying metadata: {metadata_path}")
+            st.write(f"Trying model: {model_path}")
+            
+            if os.path.exists(metadata_path) and os.path.exists(model_path):
+                st.success(f"Found model files at {base_path}")
+                
+                # Try to load metadata file
+                try:
+                    metadata = joblib.load(metadata_path)
+                    st.success("Successfully loaded metadata")
+                except Exception as e:
+                    st.error(f"Failed to load metadata from {metadata_path}: {str(e)}")
+                    continue  # Try next path
+                
+                # Try to create model
+                try:
+                    model = CombinedModel(
+                        num_classes=len(metadata['class_names']),
+                        tabular_dim=metadata['tabular_dim']
+                    )
+                    st.success("Successfully created model")
+                except Exception as e:
+                    st.error(f"Failed to create model: {str(e)}")
+                    continue  # Try next path
+                
+                # Try to load weights
+                try:
+                    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+                    st.success("Successfully loaded model weights")
+                except Exception as e:
+                    st.error(f"Failed to load weights from {model_path}: {str(e)}")
+                    continue  # Try next path
+                
+                # If we get here, everything worked
+                model.eval()
+                return model, metadata, True
+        
+        # If we get here, none of the paths worked
+        st.error("Couldn't find or load model files at any expected location")
+        return None, None, False
+        
     except Exception as e:
-        st.error(f"Model loading failed: {e}")
+        st.error(f"Unexpected error during model loading: {e}")
+        import traceback
+        st.code(traceback.format_exc())
         return None, None, False
 
 # Function to convert tensor back to viewable image
