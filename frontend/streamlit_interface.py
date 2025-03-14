@@ -82,7 +82,10 @@ class CombinedModel(nn.Module):
 def load_model_and_metadata():
     """Load model and metadata when needed, not at initialization"""
     try:
-        # Try to load metadata file
+        # Try to load metadata file        
+        # Check current directory
+        st.write("Current directory:", os.getcwd())
+        st.write("Files in directory:", os.listdir())
         try:
             metadata = joblib.load('model_metadata.joblib')
         except Exception as e:
