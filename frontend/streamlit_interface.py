@@ -436,6 +436,10 @@ def main():
         ### Important Note:
         This tool is for informational purposes only and is not a substitute for professional medical advice. 
         Always consult with a qualified healthcare provider for diagnosis and treatment.
+                 
+        ### Future Improvements:
+        This web application will be attached to a MongoDB database to store user data and images. This will allow for further training of the model and improve the accuracy of the predictions.
+        Symptom - Disease prediction will also be added at a later date once the model has completed training.
         """)
         
         # Get class names for the "About" page
