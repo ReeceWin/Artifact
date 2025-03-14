@@ -101,16 +101,10 @@ def load_model_and_metadata():
             metadata_path = os.path.join(base_path, metadata_file)
             model_path = os.path.join(base_path, model_file)
             
-            st.write(f"Trying metadata: {metadata_path}")
-            st.write(f"Trying model: {model_path}")
-            
-            if os.path.exists(metadata_path) and os.path.exists(model_path):
-                st.success(f"Found model files at {base_path}")
-                
+            if os.path.exists(metadata_path) and os.path.exists(model_path):                
                 # Try to load metadata file
                 try:
                     metadata = joblib.load(metadata_path)
-                    st.success("Successfully loaded metadata")
                 except Exception as e:
                     st.error(f"Failed to load metadata from {metadata_path}: {str(e)}")
                     continue  # Try next path
@@ -121,7 +115,6 @@ def load_model_and_metadata():
                         num_classes=len(metadata['class_names']),
                         tabular_dim=metadata['tabular_dim']
                     )
-                    st.success("Successfully created model")
                 except Exception as e:
                     st.error(f"Failed to create model: {str(e)}")
                     continue  # Try next path
@@ -129,7 +122,6 @@ def load_model_and_metadata():
                 # Try to load weights
                 try:
                     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-                    st.success("Successfully loaded model weights")
                 except Exception as e:
                     st.error(f"Failed to load weights from {model_path}: {str(e)}")
                     continue  # Try next path
