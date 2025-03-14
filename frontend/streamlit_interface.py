@@ -81,24 +81,7 @@ class CombinedModel(nn.Module):
 @st.cache_resource
 def load_model_and_metadata():
     """Load model and metadata with extensive path checking and diagnostics"""
-    try:
-        import os
-        
-        # Show detailed environment info
-        with st.expander("Debugging Environment", expanded=True):
-            st.write("Current working directory:", os.getcwd())
-            st.write("Files in current directory:", os.listdir())
-            
-            # List contents of parent directories
-            parent_dir = os.path.dirname(os.getcwd())
-            if os.path.exists(parent_dir):
-                st.write(f"Files in parent directory ({parent_dir}):", os.listdir(parent_dir))
-            
-            # Check frontend directory if it exists
-            frontend_dir = os.path.join(os.getcwd(), "frontend")
-            if os.path.exists(frontend_dir):
-                st.write(f"Files in frontend directory:", os.listdir(frontend_dir))
-        
+    try:        
         # Possible locations to check for model files
         possible_paths = [
             # Current directory
