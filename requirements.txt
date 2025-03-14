@@ -12,7 +12,6 @@ narwhals==1.30.0
 networkx==3.2.1
 numpy #removed specific build
 opencv-python==4.11.0.86
-overrides @ file:///C:/b/abs_cfh89c8yf4/croot/overrides_1699371165349/work
 pandas  #removed specific build
 protobuf==5.29.3
 pyarrow==19.0.1
