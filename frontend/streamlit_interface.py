@@ -1,4 +1,6 @@
 import streamlit as st
+# This prevents Streamlit from watching the torch module
+os.environ["STREAMLIT_WATCH_MODULES"] = "false"
 import numpy as np
 import pandas as pd
 import torch
